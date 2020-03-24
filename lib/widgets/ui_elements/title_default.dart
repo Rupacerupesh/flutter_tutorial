@@ -10,9 +10,7 @@ class TitleDefault extends StatelessWidget {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 30.0,
-        color: Theme.of(context).accentColor,
-      ),
+          fontSize: 26.0, fontWeight: FontWeight.bold, fontFamily: 'Oswald'),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './../widgets/products/products.dart';
+import '../widgets/products/products.dart';
 
 class ProductsPage extends StatelessWidget {
   final List<Map<String, dynamic>> products;
@@ -32,7 +32,13 @@ class ProductsPage extends StatelessWidget {
     return Scaffold(
       drawer: _buildSideDrawer(context),
       appBar: AppBar(
-        title: Text('Cheekyy'),
+        title: Text('EasyList'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.favorite),
+            onPressed: () {},
+          )
+        ],
       ),
       body: Products(products),
     );

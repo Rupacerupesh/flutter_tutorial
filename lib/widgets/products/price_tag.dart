@@ -7,16 +7,14 @@ class PriceTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.5),
       decoration: BoxDecoration(
-        color: Colors.cyan[200],
-        borderRadius: BorderRadius.circular(5.0),
-      ),
+          color: Theme.of(context).accentColor,
+          borderRadius: BorderRadius.circular(5.0)),
       child: Text(
-        'Rs ' + price,
-        style: TextStyle(color: Colors.grey[100]),
+        '\$$price',
+        style: TextStyle(color: Colors.white),
       ),
     );
   }
