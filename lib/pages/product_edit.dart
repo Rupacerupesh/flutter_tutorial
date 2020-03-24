@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../widgets/helpers/ensure_visible.dart';
 
+import './../models/product.dart';
+
+import 'package:scoped_model/scoped_model.dart';
+import './../scoped-models/products.dart';
+
 class ProductEditPage extends StatefulWidget {
   final Function addProduct;
   final Function updateProduct;
-  final Map<String, dynamic> product;
+  final Product product;
   final int productIndex;
 
   ProductEditPage(
@@ -22,7 +27,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
     'title': null,
     'description': null,
     'price': null,
-    'image': 'assets/food.jpg'
+    'image': 'assets/test.jpg'
   };
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _titleFocusNode = FocusNode();
@@ -35,7 +40,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
       child: TextFormField(
         focusNode: _titleFocusNode,
         decoration: InputDecoration(labelText: 'Product Title'),
-        initialValue: widget.product == null ? '' : widget.product['title'],
+        initialValue: widget.product == null ? '' : widget.product.title,
         validator: (String value) {
           // if (value.trim().length <= 0) {
           if (value.isEmpty || value.length < 5) {
@@ -56,8 +61,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         focusNode: _descriptionFocusNode,
         maxLines: 4,
         decoration: InputDecoration(labelText: 'Product Description'),
-        initialValue:
-            widget.product == null ? '' : widget.product['description'],
+        initialValue: widget.product == null ? '' : widget.product.description,
         validator: (String value) {
           // if (value.trim().length <= 0) {
           if (value.isEmpty || value.length < 10) {
@@ -79,7 +83,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
         keyboardType: TextInputType.number,
         decoration: InputDecoration(labelText: 'Product Price'),
         initialValue:
-            widget.product == null ? '' : widget.product['price'].toString(),
+            widget.product == null ? '' : widget.product.price.toString(),
         validator: (String value) {
           // if (value.trim().length <= 0) {
           if (value.isEmpty ||
@@ -92,6 +96,19 @@ class _ProductEditPageState extends State<ProductEditPage> {
         },
       ),
     );
+  }
+
+  Widget _buildSubmitButton(){
+    return ScopedModelDescendant<ProductsModel>(builder: (BuildContext context,Widget child,ProductsModel model){
+      return RaisedButton(
+                child: Text('Save'),
+                textColor: Colors.white,
+                color: Theme.of(context).accentColor,
+                onPressed: () =>_submitForm(model.addProduct,model.updateProduct),
+              );
+
+    }); 
+
   }
 
   Widget _buildPageContent(BuildContext context) {
@@ -115,11 +132,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
               SizedBox(
                 height: 10.0,
               ),
-              RaisedButton(
-                child: Text('Save'),
-                textColor: Colors.white,
-                onPressed: _submitForm,
-              )
+              _buildSubmitButton(),
               // GestureDetector(
               //   onTap: _submitForm,
               //   child: Container(
@@ -135,15 +148,25 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm(Function addProduct,Function updateProduct) {
     if (!_formKey.currentState.validate()) {
       return;
     }
     _formKey.currentState.save();
     if (widget.product == null) {
-      widget.addProduct(_formData);
+      addProduct(Product(
+          title: _formData['title'],
+          image: _formData['image'],
+          price: _formData['price'],
+          description: _formData['description']));
     } else {
-      widget.updateProduct(widget.productIndex, _formData);
+      updateProduct(
+          widget.productIndex,
+          Product(
+              title: _formData['title'],
+              image: _formData['image'],
+              price: _formData['price'],
+              description: _formData['description']));
     }
 
     Navigator.pushReplacementNamed(context, '/products');

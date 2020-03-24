@@ -19,7 +19,7 @@ class _AuthPageState extends State<AuthPage> {
     return DecorationImage(
       fit: BoxFit.cover,
       colorFilter:
-          ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
+          ColorFilter.mode(Colors.black.withOpacity(0.8), BlendMode.dstATop),
       image: AssetImage('assets/background.jpg'),
     );
   }
@@ -27,7 +27,7 @@ class _AuthPageState extends State<AuthPage> {
   Widget _buildEmailTextField() {
     return TextFormField(
       decoration: InputDecoration(
-          labelText: 'E-Mail', filled: true, fillColor: Colors.white),
+          labelText: 'E-Mail', filled: true, fillColor: Colors.white12),
       keyboardType: TextInputType.emailAddress,
       validator: (String value) {
         if (value.isEmpty ||
@@ -45,7 +45,7 @@ class _AuthPageState extends State<AuthPage> {
   Widget _buildPasswordTextField() {
     return TextFormField(
       decoration: InputDecoration(
-          labelText: 'Password', filled: true, fillColor: Colors.white),
+          labelText: 'Password', filled: true, fillColor: Colors.white12),
       obscureText: true,
       validator: (String value) {
         if (value.isEmpty || value.length < 6) {
@@ -82,7 +82,7 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     final double deviceWidth = MediaQuery.of(context).size.width;
-    final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
+    final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.8;
     return Scaffold(
       appBar: AppBar(
         title: Text('Login'),
@@ -110,6 +110,7 @@ class _AuthPageState extends State<AuthPage> {
                       height: 10.0,
                     ),
                     RaisedButton(
+                      color: Theme.of(context).primaryColor.withOpacity(.8),
                       textColor: Colors.white,
                       child: Text('LOGIN'),
                       onPressed: _submitForm,

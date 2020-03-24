@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/products/products.dart';
+import './../models/product.dart';
 
 class ProductsPage extends StatelessWidget {
-  final List<Map<String, dynamic>> products;
-
-  ProductsPage(this.products);
 
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
@@ -32,7 +30,7 @@ class ProductsPage extends StatelessWidget {
     return Scaffold(
       drawer: _buildSideDrawer(context),
       appBar: AppBar(
-        title: Text('EasyList'),
+        title: Text('ChikiList'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.favorite),
@@ -40,7 +38,7 @@ class ProductsPage extends StatelessWidget {
           )
         ],
       ),
-      body: Products(products),
+      body: Products(),
     );
   }
 }
