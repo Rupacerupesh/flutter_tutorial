@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
-class ProductCreatePage extends StatefulWidget {
+class ProductEditPage extends StatefulWidget {
   final Function addProduct;
+  final Map<String, dynamic> product;
 
-  ProductCreatePage(this.addProduct);
+  ProductEditPage({this.addProduct, this.product});
 
   @override
   State<StatefulWidget> createState() {
-    return _ProductCreatePageState();
+    return _ProductEditPageState();
   }
 }
 
-class _ProductCreatePageState extends State<ProductCreatePage> {
+class _ProductEditPageState extends State<ProductEditPage> {
   final Map<String, dynamic> formdata = {
     'title': null,
     'description': null,
@@ -23,6 +24,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
   Widget _buildTitleTextField() {
     return TextFormField(
       decoration: InputDecoration(labelText: 'Product Title'),
+      initialValue: widget.product['title'],
       validator: (String value) {
         // if (value.trim().length <= 0) {
         if (value.isEmpty || value.length < 5) {
@@ -39,6 +41,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
     return TextFormField(
       maxLines: 4,
       decoration: InputDecoration(labelText: 'Product Description'),
+      initialValue: widget.product['description'],
       validator: (String value) {
         // if (value.trim().length <= 0) {
         if (value.isEmpty || value.length < 10) {
@@ -55,6 +58,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
     return TextFormField(
       keyboardType: TextInputType.number,
       decoration: InputDecoration(labelText: 'Product Price'),
+      initialValue: widget.product['price'].toString(),
       validator: (String value) {
         // if (value.trim().length <= 0) {
         if (value.isEmpty ||
@@ -83,38 +87,43 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
     final double targetPadding = deviceWidth - targetWidth;
-    return GestureDetector(
-       onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
-      },
-      child: Container(
-        margin: EdgeInsets.all(10.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: targetPadding / 2),
-            children: <Widget>[
-              _buildTitleTextField(),
-              _buildDescriptionTextField(),
-              _buildPriceTextField(),
-              SizedBox(
-                height: 10.0,
-              ),
-              RaisedButton(
-                child: Text('Save'),
-                color: Theme.of(context).accentColor,
-                textColor: Colors.white,
-                onPressed: _submitForm,
-              )
-              // GestureDetector(
-              //   onTap: _submitForm,
-              //   child: Container(
-              //     color: Colors.green,
-              //     padding: EdgeInsets.all(5.0),
-              //     child: Text('My Button'),
-              //   ),
-              // )
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Edit Product'),
+      ),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: Container(
+          margin: EdgeInsets.all(10.0),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: targetPadding / 2),
+              children: <Widget>[
+                _buildTitleTextField(),
+                _buildDescriptionTextField(),
+                _buildPriceTextField(),
+                SizedBox(
+                  height: 10.0,
+                ),
+                RaisedButton(
+                  child: Text('Save'),
+                  color: Theme.of(context).accentColor,
+                  textColor: Colors.white,
+                  onPressed: _submitForm,
+                )
+                // GestureDetector(
+                //   onTap: _submitForm,
+                //   child: Container(
+                //     color: Colors.green,
+                //     padding: EdgeInsets.all(5.0),
+                //     child: Text('My Button'),
+                //   ),
+                // )
+              ],
+            ),
           ),
         ),
       ),
