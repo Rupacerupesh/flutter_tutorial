@@ -17,21 +17,28 @@ class ConnectedProductsModel extends Model {
       'title': title,
       'description': description,
       'image': image,
-      'price': price
+      'price': price,
+      'userEmail': _authenticatedUser.email,
+      'userId': _authenticatedUser.id
     };
 
-    http.post('https://flutter-api-5c3fc.firebaseio.com/products.json',
-        body: json.encode(productData));
+    http
+        .post('https://flutter-api-5c3fc.firebaseio.com/products.json',
+            body: json.encode(productData))
+        .then((http.Response response) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
 
-    final Product newProduct = Product(
-        title: title,
-        description: description,
-        image: image,
-        price: price,
-        userEmail: _authenticatedUser.email,
-        userId: _authenticatedUser.id);
-    _products.add(newProduct);
-    notifyListeners();
+      final Product newProduct = Product(
+          id: responseData['name'],
+          title: title,
+          description: description,
+          image: image,
+          price: price,
+          userEmail: _authenticatedUser.email,
+          userId: _authenticatedUser.id);
+      _products.add(newProduct);
+      notifyListeners();
+    });
   }
 }
 
@@ -80,6 +87,37 @@ class ProductsModel extends ConnectedProductsModel {
   void deleteProduct() {
     _products.removeAt(selectedProductIndex);
     notifyListeners();
+  }
+
+  void fetchProducts() {
+    http
+        .get('https://flutter-api-5c3fc.firebaseio.com/products.json')
+        .then((http.Response response) {
+      final List<Product> fetchedProductList = [];
+      final Map<String, dynamic> productListData =
+          json.decode(response.body);
+
+      productListData
+          .forEach((String productId, dynamic productData) {
+        final Product product = Product(
+          id: productId,
+          title: productData['title'],
+          description: productData['description'],
+          image: productData['image'],
+          price: productData['price'],
+          userEmail: productData['userEmail'],
+          userId: productData['userId'],
+        );
+              print('thisisproduct');
+              print(product.image);
+
+        fetchedProductList.add(product);
+      });
+      _products = fetchedProductList;
+      notifyListeners();
+
+      print(json.decode(response.body));
+    });
   }
 
   void toggleProductFavoriteStatus() {

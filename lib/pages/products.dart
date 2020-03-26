@@ -5,7 +5,24 @@ import '../widgets/products/products.dart';
 import 'package:scoped_model/scoped_model.dart';
 import './../scoped-models/main.dart';
 
-class ProductsPage extends StatelessWidget {
+class ProductsPage extends StatefulWidget {
+  final MainModel model;
+  ProductsPage(this.model);
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return _ProductsPageState();
+  }
+}
+
+class _ProductsPageState extends State<ProductsPage> {
+  @override
+  initState() {
+    widget.model.fetchProducts();
+    super.initState();
+  }
+
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
       child: Column(
@@ -33,8 +50,8 @@ class ProductsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('ChikiList'),
         actions: <Widget>[
-          ScopedModelDescendant<MainModel>(builder:
-              (BuildContext context, Widget child, MainModel model) {
+          ScopedModelDescendant<MainModel>(
+              builder: (BuildContext context, Widget child, MainModel model) {
             return IconButton(
               icon: Icon(model.displayFavoritesOnly
                   ? Icons.favorite
