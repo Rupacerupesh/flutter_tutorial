@@ -5,7 +5,7 @@ import '../widgets/helpers/ensure_visible.dart';
 import './../models/product.dart';
 
 import 'package:scoped_model/scoped_model.dart';
-import './../scoped-models/products.dart';
+import './../scoped-models/main.dart';
 
 class ProductEditPage extends StatefulWidget {
   @override
@@ -90,14 +90,14 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   Widget _buildSubmitButton() {
-    return ScopedModelDescendant<ProductsModel>(
-        builder: (BuildContext context, Widget child, ProductsModel model) {
+    return ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
       return RaisedButton(
-        child: Text('Save'),
-        textColor: Colors.white,
-        color: Theme.of(context).accentColor,
-        onPressed: () => _submitForm(model.addProduct, model.updateProduct,model.selectedProductIndex)
-      );
+          child: Text('Save'),
+          textColor: Colors.white,
+          color: Theme.of(context).accentColor,
+          onPressed: () => _submitForm(model.addProduct, model.updateProduct,
+              model.selectProduct, model.selectedProductIndex));
     });
   }
 
@@ -138,34 +138,35 @@ class _ProductEditPageState extends State<ProductEditPage> {
     );
   }
 
-  void _submitForm(Function addProduct, Function updateProduct,
+  void _submitForm(
+      Function addProduct, Function updateProduct, Function setSelectedProduct,
       [int selectedProductIndex]) {
     if (!_formKey.currentState.validate()) {
       return;
     }
     _formKey.currentState.save();
     if (selectedProductIndex == null) {
-      addProduct(Product(
+      addProduct(
           title: _formData['title'],
           image: _formData['image'],
           price: _formData['price'],
-          description: _formData['description']));
+          description: _formData['description']);
     } else {
       updateProduct(
-          Product(
-              title: _formData['title'],
-              image: _formData['image'],
-              price: _formData['price'],
-              description: _formData['description']));
+          title: _formData['title'],
+          image: _formData['image'],
+          price: _formData['price'],
+          description: _formData['description']);
     }
 
-    Navigator.pushReplacementNamed(context, '/products');
+    Navigator.pushReplacementNamed(context, '/products')
+        .then((_) => setSelectedProduct(null));
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<ProductsModel>(
-        builder: (BuildContext context, Widget child, ProductsModel model) {
+    return ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
       final Widget pageContent =
           _buildPageContent(context, model.selectedProduct);
       return model.selectedProductIndex == null
