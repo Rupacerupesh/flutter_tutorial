@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/helpers/ensure_visible.dart';
-
-import './../models/product.dart';
-
 import 'package:scoped_model/scoped_model.dart';
-import './../scoped-models/main.dart';
+
+import '../widgets/helpers/ensure_visible.dart';
+import '../models/product.dart';
+import '../scoped-models/main.dart';
 
 class ProductEditPage extends StatefulWidget {
   @override
@@ -91,14 +90,15 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   Widget _buildSubmitButton() {
     return ScopedModelDescendant<MainModel>(
-        builder: (BuildContext context, Widget child, MainModel model) {
-      return RaisedButton(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        return RaisedButton(
           child: Text('Save'),
           textColor: Colors.white,
-          color: Theme.of(context).accentColor,
           onPressed: () => _submitForm(model.addProduct, model.updateProduct,
-              model.selectProduct, model.selectedProductIndex));
-    });
+              model.selectProduct, model.selectedProductIndex),
+        );
+      },
+    );
   }
 
   Widget _buildPageContent(BuildContext context, Product product) {
@@ -147,16 +147,18 @@ class _ProductEditPageState extends State<ProductEditPage> {
     _formKey.currentState.save();
     if (selectedProductIndex == null) {
       addProduct(
-          title: _formData['title'],
-          image: _formData['image'],
-          price: _formData['price'],
-          description: _formData['description']);
+        _formData['title'],
+        _formData['description'],
+        _formData['image'],
+        _formData['price'],
+      );
     } else {
       updateProduct(
-          title: _formData['title'],
-          image: _formData['image'],
-          price: _formData['price'],
-          description: _formData['description']);
+        _formData['title'],
+        _formData['description'],
+        _formData['image'],
+        _formData['price'],
+      );
     }
 
     Navigator.pushReplacementNamed(context, '/products')
@@ -166,17 +168,18 @@ class _ProductEditPageState extends State<ProductEditPage> {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
-        builder: (BuildContext context, Widget child, MainModel model) {
-      final Widget pageContent =
-          _buildPageContent(context, model.selectedProduct);
-      return model.selectedProductIndex == null
-          ? pageContent
-          : Scaffold(
-              appBar: AppBar(
-                title: Text('Edit Product'),
-              ),
-              body: pageContent,
-            );
-    });
+      builder: (BuildContext context, Widget child, MainModel model) {
+        final Widget pageContent =
+            _buildPageContent(context, model.selectedProduct);
+        return model.selectedProductIndex == null
+            ? pageContent
+            : Scaffold(
+                appBar: AppBar(
+                  title: Text('Edit Product'),
+                ),
+                body: pageContent,
+              );
+      },
+    );
   }
 }
