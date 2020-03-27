@@ -9,7 +9,7 @@ import 'dart:convert';
 
 class ConnectedProductsModel extends Model {
   List<Product> _products = [];
-  int _selProductIndex;
+  String _selProductId;
   User _authenticatedUser;
   bool _isLoading = false;
 
@@ -63,19 +63,27 @@ class ProductsModel extends ConnectedProductsModel {
     return List.from(_products);
   }
 
-  int get selectedProductIndex {
-    return _selProductIndex;
+  String get selectedProductId {
+    return _selProductId;
   }
 
   Product get selectedProduct {
-    if (selectedProductIndex == null) {
+    if (selectedProductId == null) {
       return null;
     }
-    return _products[selectedProductIndex];
+    return _products.firstWhere((Product product) {
+      return product.id == _selProductId;
+    });
   }
 
   bool get displayFavoritesOnly {
     return _showFavorites;
+  }
+
+  int get selectedProductIndex {
+    return _products.indexWhere((Product product) {
+      return product.id == _selProductId;
+    });
   }
 
   Future<Null> updateProduct(
@@ -105,6 +113,7 @@ class ProductsModel extends ConnectedProductsModel {
           price: price,
           userEmail: selectedProduct.userEmail,
           userId: selectedProduct.userId);
+
       _products[selectedProductIndex] = updatedProduct;
       notifyListeners();
     });
@@ -113,8 +122,9 @@ class ProductsModel extends ConnectedProductsModel {
   void deleteProduct() {
     _isLoading = true;
     final deleteProductId = selectedProduct.id;
+
     _products.removeAt(selectedProductIndex);
-    _selProductIndex = null;
+    _selProductId = null;
     notifyListeners();
     http
         .delete(
@@ -125,11 +135,11 @@ class ProductsModel extends ConnectedProductsModel {
     });
   }
 
-  void fetchProducts() {
+  Future<Null> fetchProducts() {
     _isLoading = true;
     notifyListeners();
 
-    http
+    return http
         .get('https://flutter-api-5c3fc.firebaseio.com/products.json')
         .then((http.Response response) {
       final List<Product> fetchedProductList = [];
@@ -137,6 +147,7 @@ class ProductsModel extends ConnectedProductsModel {
 
       if (productListData == null) {
         _isLoading = false;
+        _products = [];
         notifyListeners();
         return;
       }
@@ -158,8 +169,8 @@ class ProductsModel extends ConnectedProductsModel {
       _isLoading = false;
 
       notifyListeners();
+      _selProductId = null;
 
-      print(json.decode(response.body));
     });
   }
 
@@ -167,6 +178,7 @@ class ProductsModel extends ConnectedProductsModel {
     final bool isCurrentlyFavorite = selectedProduct.isFavorite;
     final bool newFavoriteStatus = !isCurrentlyFavorite;
     final Product updatedProduct = Product(
+        id: selectedProduct.id,
         title: selectedProduct.title,
         description: selectedProduct.description,
         price: selectedProduct.price,
@@ -174,12 +186,13 @@ class ProductsModel extends ConnectedProductsModel {
         userEmail: selectedProduct.userEmail,
         userId: selectedProduct.userId,
         isFavorite: newFavoriteStatus);
+
     _products[selectedProductIndex] = updatedProduct;
     notifyListeners();
   }
 
-  void selectProduct(int index) {
-    _selProductIndex = index;
+  void selectProduct(String productId) {
+    _selProductId = productId;
     notifyListeners();
   }
 
