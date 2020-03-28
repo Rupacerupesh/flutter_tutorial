@@ -12,7 +12,6 @@ class ConnectedProductsModel extends Model {
   String _selProductId;
   User _authenticatedUser;
   bool _isLoading = false;
-
 }
 
 class ProductsModel extends ConnectedProductsModel {
@@ -52,7 +51,6 @@ class ProductsModel extends ConnectedProductsModel {
     });
   }
 
-  
   Future<bool> addProduct(
       String title, String description, String image, double price) async {
     _isLoading = true;
@@ -66,16 +64,16 @@ class ProductsModel extends ConnectedProductsModel {
       'userEmail': _authenticatedUser.email,
       'userId': _authenticatedUser.id
     };
-    final http.Response response = await http
-        .post('https://flutter-api-5c3fc.firebaseio.com/products.json',
-            body: json.encode(productData));
-       
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-      try {
+    final http.Response response = await http.post(
+        'https://flutter-api-5c3fc.firebaseio.com/products.json',
+        body: json.encode(productData));
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+    try {
       final Map<String, dynamic> responseData = json.decode(response.body);
 
       final Product newProduct = Product(
@@ -90,13 +88,11 @@ class ProductsModel extends ConnectedProductsModel {
       _isLoading = false;
       notifyListeners();
       return true;
-      }catch(error) {
-        _isLoading = false;
+    } catch (error) {
+      _isLoading = false;
       notifyListeners();
       return false;
-
-      }
-
+    }
   }
 
   Future<bool> updateProduct(
@@ -232,6 +228,20 @@ class UserModel extends ConnectedProductsModel {
   void login(String email, String password) {
     _authenticatedUser =
         User(id: 'fdalsdfasf', email: email, password: password);
+  }
+
+  Future<Map<String, dynamic>> signup(String email, String password) async {
+    final Map<String, dynamic> authData = {
+      'email': email,
+      'password': password,
+      'returnSecureToken': true
+    };
+
+    final http.Response response = await http.post(
+        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[AIzaSyCDejpUn4WjkwlyxolXbunmFVFMl9NChCM]',
+        body: json.encode(authData),
+        headers: {'Content-type': 'application/json'});
+    return {'success': true, 'message': 'SignUp successful'};
   }
 }
 
