@@ -3,9 +3,11 @@ import 'dart:async';
 
 import '../models/product.dart';
 import '../models/user.dart';
+import '../models/auth.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ConnectedProductsModel extends Model {
   List<Product> _products = [];
@@ -65,7 +67,7 @@ class ProductsModel extends ConnectedProductsModel {
       'userId': _authenticatedUser.id
     };
     final http.Response response = await http.post(
-        'https://flutter-api-5c3fc.firebaseio.com/products.json',
+        'https://flutter-api-5c3fc.firebaseio.com/products.json?auth=${_authenticatedUser.token}',
         body: json.encode(productData));
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -110,7 +112,7 @@ class ProductsModel extends ConnectedProductsModel {
 
     return http
         .put(
-            'https://flutter-api-5c3fc.firebaseio.com/products/${selectedProduct.id}.json',
+            'https://flutter-api-5c3fc.firebaseio.com/products/${selectedProduct.id}.json?auth=${_authenticatedUser.token}',
             body: json.encode(updateData))
         .then((http.Response response) {
       _isLoading = false;
@@ -142,7 +144,7 @@ class ProductsModel extends ConnectedProductsModel {
     notifyListeners();
     return http
         .delete(
-            'https://flutter-api-5c3fc.firebaseio.com/products/${deleteProductId}.json')
+            'https://flutter-api-5c3fc.firebaseio.com/products/${deleteProductId}.json?auth=${_authenticatedUser.token}')
         .then((http.Response response) {
       _isLoading = true;
       notifyListeners();
@@ -159,7 +161,8 @@ class ProductsModel extends ConnectedProductsModel {
     notifyListeners();
 
     return http
-        .get('https://flutter-api-5c3fc.firebaseio.com/products.json')
+        .get(
+            'https://flutter-api-5c3fc.firebaseio.com/products.json?auth=${_authenticatedUser.token}')
         .then<Null>((http.Response response) {
       final List<Product> fetchedProductList = [];
       final Map<String, dynamic> productListData = json.decode(response.body);
@@ -225,23 +228,73 @@ class ProductsModel extends ConnectedProductsModel {
 }
 
 class UserModel extends ConnectedProductsModel {
-  void login(String email, String password) {
-    _authenticatedUser =
-        User(id: 'fdalsdfasf', email: email, password: password);
+  User get user {
+    return _authenticatedUser;
   }
-
-  Future<Map<String, dynamic>> signup(String email, String password) async {
+  
+  Future<Map<String, dynamic>> authenticate(String email, String password,
+      [AuthMode mode = AuthMode.Login]) async {
+    _isLoading = true;
+    notifyListeners();
     final Map<String, dynamic> authData = {
       'email': email,
       'password': password,
       'returnSecureToken': true
     };
 
-    final http.Response response = await http.post(
-        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[AIzaSyCDejpUn4WjkwlyxolXbunmFVFMl9NChCM]',
-        body: json.encode(authData),
-        headers: {'Content-type': 'application/json'});
-    return {'success': true, 'message': 'SignUp successful'};
+    http.Response response;
+    if (mode == AuthMode.Login) {
+      response = await http.post(
+          'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCDejpUn4WjkwlyxolXbunmFVFMl9NChCM',
+          body: json.encode(authData),
+          headers: {'Content-type': 'application/json'});
+    } else {
+      response = await http.post(
+          'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCDejpUn4WjkwlyxolXbunmFVFMl9NChCM',
+          body: json.encode(authData),
+          headers: {'Content-type': 'application/json'});
+    }
+
+    final Map<String, dynamic> responseData = json.decode(response.body);
+    bool hasError = true;
+    String message = 'Something went wrong';
+
+    if (responseData.containsKey('idToken')) {
+      hasError = false;
+      message = 'SignUp successful';
+      _authenticatedUser = User(
+          id: responseData['localId'],
+          email: email,
+          token: responseData['idToken']);
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      prefs.setString('token', responseData['idToken']);
+      prefs.setString('userEmail', email);
+      prefs.setString('userId', responseData['localId']);
+    } else if (responseData['error']['message'] == 'EMAIL_NOT_FOUND') {
+      message = 'The email was not found';
+    } else if (responseData['error']['message'] == 'INVALID_PASSWORD') {
+      message = 'The password is invalid';
+    } else if (responseData['error']['message'] == 'EMAIL_EXISTS') {
+      message = 'The email already exists';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+
+    return {'success': !hasError, 'message': message};
+  }
+
+  void autoAuthenticate() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    final String token = prefs.getString('token');
+    if (token != null) {
+      final String userEmail = prefs.getString('userEmail');
+      final String userId = prefs.getString('userId');
+      _authenticatedUser = User(id: userId, email: userEmail, token: token);
+      notifyListeners();
+    }
   }
 }
 
