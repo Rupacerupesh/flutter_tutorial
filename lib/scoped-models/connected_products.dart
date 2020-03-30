@@ -157,7 +157,7 @@ class ProductsModel extends ConnectedProductsModel {
     });
   }
 
-  Future<Null> fetchProducts() {
+  Future<Null> fetchProducts({onlyForUser = false}) {
     _isLoading = true;
     notifyListeners();
 
@@ -191,7 +191,13 @@ class ProductsModel extends ConnectedProductsModel {
 
         fetchedProductList.add(product);
       });
-      _products = fetchedProductList;
+
+      _products = onlyForUser
+          ? fetchedProductList.where((Product product) {
+              return product.userId == _authenticatedUser.id;
+            }).toList()
+          : fetchedProductList;
+
       _isLoading = false;
 
       notifyListeners();
