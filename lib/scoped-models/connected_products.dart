@@ -177,14 +177,17 @@ class ProductsModel extends ConnectedProductsModel {
 
       productListData.forEach((String productId, dynamic productData) {
         final Product product = Product(
-          id: productId,
-          title: productData['title'],
-          description: productData['description'],
-          image: productData['image'],
-          price: productData['price'],
-          userEmail: productData['userEmail'],
-          userId: productData['userId'],
-        );
+            id: productId,
+            title: productData['title'],
+            description: productData['description'],
+            image: productData['image'],
+            price: productData['price'],
+            userEmail: productData['userEmail'],
+            userId: productData['userId'],
+            isFavorite: productData['wishListUsers'] == null
+                ? false
+                : (productData['wishListUsers'] as Map<String, dynamic>)
+                    .containsKey(_authenticatedUser.id));
 
         fetchedProductList.add(product);
       });
@@ -200,9 +203,11 @@ class ProductsModel extends ConnectedProductsModel {
     });
   }
 
-  void toggleProductFavoriteStatus() {
+  void toggleProductFavoriteStatus() async {
     final bool isCurrentlyFavorite = selectedProduct.isFavorite;
     final bool newFavoriteStatus = !isCurrentlyFavorite;
+    http.Response response;
+
     final Product updatedProduct = Product(
         id: selectedProduct.id,
         title: selectedProduct.title,
@@ -215,6 +220,45 @@ class ProductsModel extends ConnectedProductsModel {
 
     _products[selectedProductIndex] = updatedProduct;
     notifyListeners();
+
+    if (newFavoriteStatus) {
+      response = await http.put(
+          'https://flutter-api-5c3fc.firebaseio.com/products/${selectedProduct.id}/wishlistUers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}',
+          body: json.encode(true));
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final Product updatedProduct = Product(
+            id: selectedProduct.id,
+            title: selectedProduct.title,
+            description: selectedProduct.description,
+            price: selectedProduct.price,
+            image: selectedProduct.image,
+            userEmail: selectedProduct.userEmail,
+            userId: selectedProduct.userId,
+            isFavorite: !newFavoriteStatus);
+
+        _products[selectedProductIndex] = updatedProduct;
+        notifyListeners();
+      }
+    } else {
+      response = await http.delete(
+          'https://flutter-api-5c3fc.firebaseio.com/products/${selectedProduct.id}/wishlistUers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}');
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        final Product updatedProduct = Product(
+            id: selectedProduct.id,
+            title: selectedProduct.title,
+            description: selectedProduct.description,
+            price: selectedProduct.price,
+            image: selectedProduct.image,
+            userEmail: selectedProduct.userEmail,
+            userId: selectedProduct.userId,
+            isFavorite: !newFavoriteStatus);
+
+        _products[selectedProductIndex] = updatedProduct;
+        notifyListeners();
+      }
+    }
   }
 
   void selectProduct(String productId) {
@@ -339,13 +383,11 @@ class UserModel extends ConnectedProductsModel {
     prefs.remove('token');
     prefs.remove('userEmail');
     prefs.remove('userId');
+    _userSubject.add(false);
   }
 
   void setAuthTimeout(int time) {
-    _authTimer = Timer(Duration(seconds: time), () {
-      logout();
-      _userSubject.add(false);
-    });
+    _authTimer = Timer(Duration(seconds: time), logout);
   }
 }
 
