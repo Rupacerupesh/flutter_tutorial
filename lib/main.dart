@@ -12,9 +12,6 @@ import './scoped-models/main.dart';
 import './models/product.dart';
 
 void main() {
-  // debugPaintSizeEnabled = true;
-  // debugPaintBaselinesEnabled = true;
-  // debugPaintPointersEnabled = true;
   runApp(MyApp());
 }
 

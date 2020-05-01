@@ -29,6 +29,8 @@
 .pub-cache/
 .pub/
 /build/
+/functions/flutter-api-5c3fc.json 
+
 
 # Web related
 lib/generated_plugin_registrant.dart
