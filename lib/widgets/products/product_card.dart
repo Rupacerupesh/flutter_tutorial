@@ -72,7 +72,6 @@ class ProductCard extends StatelessWidget {
           ),
           _buildTitlePriceRow(),
           AddressTag('Vendors, Nepal'),
-          Text(product.userEmail),
           _buildActionButtons(context)
         ],
       ),
