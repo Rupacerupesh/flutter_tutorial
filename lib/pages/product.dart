@@ -69,7 +69,7 @@ class ProductPage extends StatelessWidget {
               )
             ],
           ),
-          floatingActionButton: ProductFAB(),
+          floatingActionButton: ProductFAB(product),
         ));
   }
 }
