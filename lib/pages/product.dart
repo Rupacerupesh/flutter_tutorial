@@ -43,32 +43,46 @@ class ProductPage extends StatelessWidget {
           return Future.value(false);
         },
         child: Scaffold(
-          appBar: AppBar(
-            title: Text(product.title),
-          ),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              FadeInImage(
-                image: NetworkImage(product.image),
-                height: 300.0,
-                fit: BoxFit.cover,
-                placeholder: AssetImage('assets/test.jpg'),
-              ),
-              Container(
-                padding: EdgeInsets.all(10.0),
-                child: TitleDefault(product.title),
-              ),
-              _buildAddressPriceRow(product.price),
-              Container(
-                padding: EdgeInsets.all(10.0),
-                child: Text(
-                  product.description,
-                  textAlign: TextAlign.center,
+          // appBar: AppBar(
+          //   title: Text(product.title),
+          // ),
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: 256.0,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text(product.title),
+                  background: Hero(
+                    tag: product.id,
+                    child: FadeInImage(
+                      image: NetworkImage(product.image),
+                      height: 300.0,
+                      fit: BoxFit.cover,
+                      placeholder: AssetImage('assets/test.jpg'),
+                    ),
+                  ),
                 ),
-              )
+              ),
+              SliverList(
+                  delegate: SliverChildListDelegate([
+                Container(
+                  padding: EdgeInsets.all(10.0),
+                  alignment: Alignment.center,
+                  child: TitleDefault(product.title),
+                ),
+                _buildAddressPriceRow(product.price),
+                Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: Text(
+                    product.description,
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              ]))
             ],
           ),
+
           floatingActionButton: ProductFAB(product),
         ));
   }
